@@ -17,26 +17,44 @@ void mouseClick() {
 }
 
 int main() {
+
+	// Device context 
 	HDC hdc = GetDC(NULL);
-
-	int x = 100;
-	int y = 100;
-
-	COLORREF color = GetPixel(hdc, x, y);
-
-	BYTE red = GetRValue(color);
-	BYTE green = GetGValue(color);
-	BYTE blue = GetBValue(color);
-
-	if (SetCursorPos(x, y)) {
-		std::cout << "Mouse mov ( " << x << ", " << y << " )" << std::endl;
-	}
-	else {
-		std::cout << "Mouse movement error" << std::endl;
+	if (hdc == NULL) {
+		std::cerr << "Error: Couldnt get HDC" << std::endl;
+		return 1;
 	}
 
-	std::cout << "Color (" << x << ", " << y << "): "
-		<< "R=" << int(red) << " G=" << int(green) << " B=" << int(red);
+	// FOV
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	int centerX = screenWidth / 2;
+	int centerY = screenHeight / 2;
+
+	// Detecting color
+	int colorR = 255;
+	int colorG = 0;
+	int colorB = 0;
+
+	// Detection range
+	int range = 75;
+
+	for (int x = centerX - range; x <= centerX + range; x++) {
+		for (int y = centerY - range; y <= centerY + range; y++) {
+
+			COLORREF color = GetPixel(hdc, x, y);
+
+			// Extract R, G, B
+			BYTE r = GetRValue(color);
+			BYTE g = GetGValue(color);
+			BYTE b = GetBValue(color);
+
+			// Compare with detecting color
+			if (r == colorR && g == colorG && b == colorB) {
+				SetCursorPos(x, y);
+			}
+		}
+	}
 
 	ReleaseDC(NULL, hdc);
 
